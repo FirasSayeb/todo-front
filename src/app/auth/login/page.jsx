@@ -46,7 +46,7 @@ export default function Login() {
             console.log(result?.email)
            
             Cookies.set("email", result?.email);
-            if (result?.role === "user") {
+            if (result?.role === "user") {  
                 router.push('/user/dashboard');
             } else if (result?.role === "admin") {
                 router.push('/admin/dashboard');
@@ -55,7 +55,7 @@ export default function Login() {
                 setShow(true)
             }
         } catch (error) {
-            console.error('An error occurred:', error);
+            console.error('An error occurred:', error);    
             setShow(true)
         }
     };

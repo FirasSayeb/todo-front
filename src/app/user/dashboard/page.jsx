@@ -22,10 +22,12 @@ export default function User() {
 
     useEffect(() => {
         if (email) {
+            console.log(email)
             fetch(`http://localhost:4000/api/todos?email=${email}`)
                 .then(res => res.json())
                 .then(data => {
-                    setTodo(data);
+                    console.log(data)
+                    setTodo(data); 
                     setSharedUsers(data.sharedWith || []); 
                 })
                 .catch(err => {
@@ -35,12 +37,14 @@ export default function User() {
         }
     }, [todo]);
 
+   
+
     const calculateCompletion = (tasks) => {
         const completed = tasks?.filter(task => task.finished).length;
         return tasks?.length > 0 ? (completed / tasks?.length) * 100 : 0;
     };
 
-    const deleteTask = async (taskId) => {
+    const deleteTask = async (taskId,email) => {
         try {
             await fetch(`http://localhost:4000/api/todos/tasks/${taskId}?email=${email}`, { method: 'DELETE' });
             setTodo(prev => ({
@@ -58,7 +62,7 @@ export default function User() {
         setFinished(task.finished); 
     };
 
-    const saveEditedTask = async () => {
+    const saveEditedTask = async (email) => {
         if (editTaskName.trim()) {
             try {
                 await fetch(`http://localhost:4000/api/todos/tasks/${editTaskId}?email=${email}`, {
@@ -73,7 +77,7 @@ export default function User() {
                         task.id === editTaskId ? { ...task, task: editTaskName, finished } : task
                     )
                 }));
-                setEditTaskId(null);
+                setEditTaskId(null); 
                 setEditTaskName("");
                 setFinished(false); 
             } catch (error) {
@@ -83,7 +87,7 @@ export default function User() {
     };
 
     const handleShareTodo = async () => {
-        if (!shareWithEmail) {
+        if (!shareWithEmail) { 
             alert('Please enter a valid email.');
             return;
         }
@@ -236,33 +240,63 @@ export default function User() {
                         <td className="text-secondary">{task.finished ? "✔️" : "❌"}</td>
                         <td className="text-secondary">
                             {editTaskId === task.id ? (
-                                <button className="btn btn-success" onClick={saveEditedTask}>Save</button>
+                                <button className="btn btn-success" onClick={()=>saveEditedTask(email)}>Save</button>
                             ) : (
                                 <button className="btn btn-warning" onClick={() => editTask(task)}>Edit</button>
                             )}
-                            <button className="btn btn-danger" onClick={() => deleteTask(task.id)}>Delete</button>
+                            <button className="btn btn-danger" onClick={() => deleteTask(task.id,email)}>Delete</button>
                         </td>
                     </tr>
+                    
                 ))}
-                {todo.sharedWith?.map(shared => (
-                    <React.Fragment key={shared.userEmail}>
-                        <h4>Shared with {shared.userEmail} ({shared.mode} mode):</h4>
-                        {shared.tasks.map(task => (
-                            <tr key={task.id}>
-                                <td className="text-secondary">{task.task}</td>
-                                <td className="text-secondary">{task.finished ? "✔️" : "❌"}</td>
-                                <td className="text-secondary">
-                                    {shared.mode === 'edit' && (
-                                        <>
-                                            <button className="btn btn-warning" onClick={() => editTask(task)}>Edit</button>
-                                            <button className="btn btn-danger" onClick={() => deleteTask(task.id)}>Delete</button>
-                                        </>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </React.Fragment>
-                ))}
+                {todo.sharedTasks?.length > 0 ? (
+    <p>Tasks shared from other users: {todo.sharedTasks?.map(task => task.userEmail).join(', ')}</p>
+) : null}
+
+
+
+{todo.sharedTasks && todo.sharedTasks.length > 0 ? (
+    todo.sharedTasks[0].tasks
+        .sort((a, b) => a.finished - b.finished)
+        .map((task) => (
+            <tr key={task.id}>
+                <td className="text-secondary">
+                    { editTaskId === task.id ? (
+                        <>
+                            <input
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={finished}
+                                onChange={(e) => setFinished(e.target.checked)}
+                            />
+                            <input
+                                className="form-control"
+                                value={editTaskName}
+                                onChange={(e) => setEditTaskName(e.target.value)}
+                            />
+                        </> 
+                    ) : (
+                        task.task
+                    )}
+                </td>
+                <td className="text-secondary">{task.finished ? "✔️" : "❌"}</td>
+                <td className="text-secondary">
+                   
+                    { todo.sharedTasks[0].mode=="edit" ? editTaskId === task.id ? (
+                        <button className="btn btn-success" onClick={()=>saveEditedTask(todo.sharedTasks[0].userEmail)}>Save</button>
+                    ) : (<>  
+                        <button className="btn btn-warning" onClick={() => editTask(task)}>Edit</button>
+                        <button className="btn btn-danger" onClick={() => deleteTask(task.id,todo.sharedTasks[0].userEmail)}>Delete</button>
+                        </>
+                    ):<></>}
+                   
+                </td>
+            </tr>
+        ))
+) : <></>}
+
+  
+               
             </tbody>
         </table>
     </div>

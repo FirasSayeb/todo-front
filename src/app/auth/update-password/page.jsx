@@ -65,7 +65,7 @@ export default function Update(){
             <p className="invalid-feedback"> {errors.email?.message}</p>
             </div>
             <div className="col-md-7 col-xs-5">
-            <label className="form-label required">Password:</label>
+            <label className="form-label required"> New Password:</label>
             <input type="password" {...register("password")} className={`form-control ${errors.password ? 'is-invalid' :""} `} />
             <p className="invalid-feedback">{errors.password?.message}</p>
             </div>

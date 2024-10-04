@@ -14,6 +14,7 @@ export default function Ajouter() {
     const handleAddTask = async () => {
         if (newTask.trim()) {
             try {
+                console.log(email + newTask)
                 const response = await fetch('http://localhost:4000/api/todos/tasks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -25,7 +26,7 @@ export default function Ajouter() {
 
                 if (response.ok) {
                     setNewTask(""); 
-                   // alert('Task added successfully!');
+                   
                    setMessage('Task added successfully!')
                    setShow(true)
                 } else {
